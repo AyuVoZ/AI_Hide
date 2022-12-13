@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import math
 
 class Grid():
 
@@ -8,6 +9,7 @@ class Grid():
     __WALL = 1
     __TURRET = 2
     __PLAYER = 3
+
 
     
     def __init__(self, gridSize):
@@ -39,7 +41,15 @@ class Grid():
 
         #place the turret in the center of the grid
         self.__grid[self.__posTurret[0], self.__posTurret[1]] = self.__TURRET
-        
+
+        #place the player randomly on the map
+        correct = False
+        while(not correct):
+            self.__posAgent = [np.random.randint(0,self.__size-1), np.random.randint(0,self.__size-1)]
+            if((self.__grid[self.__posAgent[0], self.__posAgent[1]]== self.__VOID) and not self.isHide()):
+                correct = True
+
+        self.__grid[self.__posAgent[0], self.__posAgent[1]] = self.__PLAYER
 
     #show the state of the grid in a terminal
     def show(self, mode='console'):
@@ -63,9 +73,50 @@ class Grid():
     def size(self):
         return self.__size
 
+    def isWall(self, x, y):
+        return self.__grid[x,y] == self.__WALL
+
+    def isHide(self):
+        
+        x = self.__posTurret[0]
+        y = self.__posTurret[1]
+
+        xa = self.__posAgent[0]
+        ya = self.__posAgent[1]
+
+        while(x!=xa or y!=ya):
+            angle = int(((math.atan2(ya-y, xa-x)+math.pi/16)%math.pi)/(math.pi/8))%8
+            signX = int(math.copysign(1, xa-x))
+            signY = int(math.copysign(1, ya-y))
+
+            if(angle == 0 ):
+                nx, ny = 1,0
+            elif(angle == 1 or angle == 7):
+                nx, ny = 2,1
+            elif(angle == 2 or angle == 6):
+                nx, ny = 1,1
+            elif(angle == 3 or angle == 5):
+                nx, ny = 1,2
+            else:
+                nx, ny = 0,1
+            
+            for i in range(nx):
+                x += signX
+                if(self.__grid[x,y] == self.__WALL ):
+                    return True
+            for j in range(ny):
+                y += signY
+                if(self.__grid[x,y] == self.__WALL ):
+                    return True
+            
+        return False
+
+
 
 if __name__ == '__main__':
     grid = Grid(30)
+    grid.show()
+    grid.isHide()
     grid.show()
     
 
