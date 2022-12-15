@@ -10,6 +10,11 @@ class Grid():
     __TURRET = 2
     __PLAYER = 3
 
+    __LEFT = 0
+    __RIGHT = 1
+    __UP = 2
+    __DOWN = 3
+
 
     
     def __init__(self, gridSize):
@@ -111,6 +116,41 @@ class Grid():
             
         return False
 
+
+    #verify that the agent action is legal
+    def validMove(self, x, y):
+
+        #new position out of the grid
+        if (x<0 or y<0 or x>self.__size or y>self.__size):
+            return False
+        
+        #already an object at new position 
+        if(self.__grid[x,y]!=self.__WALL):
+            return False
+        
+        return True
+
+    #move the agent according to the action 
+    def move(self,action):
+        #compute new coordinates
+        x,y = self.__posAgent[0], self.__posAgent[1]
+        if action == self.__LEFT:
+            x-=1
+        elif action == self.__RIGHT:
+            x += 1
+        elif action == self.__UP:
+            y -= 1
+        elif action == self.__DOWN:
+            y += 1
+
+        #assure new position is valid
+        if(not self.validMove(x,y)):
+            return
+
+        #upfate position on the grid
+        self.__grid[self.__posAgent[0],self.__posAgent[1]] = self.__WALL
+        self.__grid[x,y] = self.__PLAYER
+        self.__posAgent[0], self.__posAgent[1] = x,y  
 
 
 if __name__ == '__main__':
