@@ -48,6 +48,15 @@ class Grid():
         self.__grid[self.__posTurret[0], self.__posTurret[1]] = self.__TURRET
 
         #place the player randomly on the map
+        self.placeAgentRandom()
+
+        
+    def placeAgentRandom(self, reset = False):
+
+        #if the agent was previously instantiated we remove it before creating another one
+        if(reset):
+            self.__grid[self.__posAgent[0], self.__posAgent[1]] = self.__VOID
+
         correct = False
         while(not correct):
             self.__posAgent = [np.random.randint(0,self.__size-1), np.random.randint(0,self.__size-1)]
@@ -55,6 +64,7 @@ class Grid():
                 correct = True
 
         self.__grid[self.__posAgent[0], self.__posAgent[1]] = self.__PLAYER
+
 
     #show the state of the grid in a terminal
     def show(self, mode='console'):
