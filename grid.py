@@ -22,7 +22,7 @@ class Grid():
         self.__generate()
 
     #procedural generation of the grid
-    def __generate(self, nObstacles = 4, p = 0.05, nLenght = 10):
+    def __generate(self, nObstacles = 3, p = 0.05, nLenght = 6):
         self.__grid = np.zeros((self.__size, self.__size))
         self.__posTurret = [int(self.__size/2), int(self.__size/2)]
         
@@ -131,11 +131,11 @@ class Grid():
     def validMove(self, x, y):
 
         #new position out of the grid
-        if (x<0 or y<0 or x>self.__size or y>self.__size):
+        if (x<0 or y<0 or x>=self.__size or y>=self.__size):
             return False
         
         #already an object at new position 
-        if(self.__grid[x,y]!=self.__WALL):
+        if(self.__grid[x,y]==self.__WALL or self.__grid[x,y]==self.__TURRET ):
             return False
         
         return True
@@ -158,15 +158,20 @@ class Grid():
             return
 
         #upfate position on the grid
-        self.__grid[self.__posAgent[0],self.__posAgent[1]] = self.__WALL
+        self.__grid[self.__posAgent[0],self.__posAgent[1]] = self.__VOID
         self.__grid[x,y] = self.__PLAYER
         self.__posAgent[0], self.__posAgent[1] = x,y  
 
+    def getPosAgent(self):
+        return np.array(self.__posAgent, dtype=np.float32)
 
 if __name__ == '__main__':
     grid = Grid(30)
     grid.show()
     grid.isHide()
-    grid.show()
+    print(grid.getPosAgent())
+ 
+
+
     
 
