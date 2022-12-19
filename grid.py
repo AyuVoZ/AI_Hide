@@ -11,6 +11,11 @@ class Grid():
 	__TURRET = 2
 	__PLAYER = 3
 
+	__LEFT = 0
+	__RIGHT = 1
+	__UP = 2
+	__DOWN = 3
+
 
 	
 	def __init__(self, gridSize):
@@ -49,6 +54,15 @@ class Grid():
 		self.__grid[self.__posTurret[0], self.__posTurret[1]] = self.__TURRET
 
 		#place the player randomly on the map
+		self.placeAgentRandom()
+
+		
+	def placeAgentRandom(self, reset = False):
+
+		#if the agent was previously instantiated we remove it before creating another one
+		if(reset):
+			self.__grid[self.__posAgent[0], self.__posAgent[1]] = self.__VOID
+
 		correct = False
 		while(not correct):
 			self.__posAgent = [np.random.randint(0,self.__size-1), np.random.randint(0,self.__size-1)]
@@ -113,15 +127,6 @@ class Grid():
 			return np.transpose(
 				np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
 			)
-	   
-	def getAgentPos(self):
-		return self.__posAgent
-
-	def setAgentPos(self, future_pos):
-		tmp_agent_pos = self.__posAgent
-		self.__posAgent = future_pos
-		self.__grid[tmp_agent_pos[0], tmp_agent_pos[1]] = self.__VOID
-		self.__grid[future_pos[0], future_pos[1]] = self.__PLAYER
 
 	#return the size of the grid
 	def size(self):
@@ -169,14 +174,51 @@ class Grid():
 		return False
 
 
+	#verify that the agent action is legal
+	def validMove(self, x, y):
+
+		#new position out of the grid
+		if (x<0 or y<0 or x>=self.__size or y>=self.__size):
+			return False
+		
+		#already an object at new position 
+		if(self.__grid[x,y]==self.__WALL or self.__grid[x,y]==self.__TURRET ):
+			return False
+		
+		return True
+
+	#move the agent according to the action 
+	def move(self,action):
+		#compute new coordinates
+		x,y = self.__posAgent[0], self.__posAgent[1]
+		if action == self.__LEFT:
+			x-=1
+		elif action == self.__RIGHT:
+			x += 1
+		elif action == self.__UP:
+			y -= 1
+		elif action == self.__DOWN:
+			y += 1
+
+		#assure new position is valid
+		if(not self.validMove(x,y)):
+			return
+
+		#upfate position on the grid
+		self.__grid[self.__posAgent[0],self.__posAgent[1]] = self.__VOID
+		self.__grid[x,y] = self.__PLAYER
+		self.__posAgent[0], self.__posAgent[1] = x,y  
+
+	def getPosAgent(self):
+		return np.array(self.__posAgent, dtype=np.float32)
 
 if __name__ == '__main__':
-	grid = Grid(20)
+	grid = Grid(30)
 	grid.show()
 	grid.isHide()
-	grid.show()
+	print(grid.getPosAgent())
+ 
 
-	while True:
-		grid.show()
+
 	
 

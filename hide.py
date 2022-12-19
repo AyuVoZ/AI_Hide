@@ -26,7 +26,7 @@ class GoLeftEnv(gym.Env):
 		self.grid_size = grid_size
 		self.grid = grid.Grid(grid_size)
 
-		self.agent_pos = self.grid.getAgentPos()
+		self.agent_pos = self.grid.getPosAgent()
 
 		# Define action and observation space
 		# They must be gym.spaces objects
@@ -35,7 +35,7 @@ class GoLeftEnv(gym.Env):
 		self.action_space = spaces.Discrete(n_actions)
 		# The observation will be the coordinate of the agent
 		# this can be described both by Discrete and Box space
-		self.observation_space = spaces.Box(low=0, high=self.grid_size,
+		self.observation_space = spaces.Box(low=0, high=self.grid.size(),
 											shape=(2,), dtype=np.float32)
 		self.nb_step = 0
 
@@ -48,10 +48,9 @@ class GoLeftEnv(gym.Env):
 		:return: (np.array) 
 		"""
 		# Initialize the agent randomly and reset the number of steps
-		del self.grid
-		self.grid = grid.Grid(self.grid_size)
+		self.grid.placeAgentRandom(reset=True)
 		self.nb_step = 0
-		self.agent_pos = self.grid.getAgentPos()
+		self.agent_pos = self.grid.getPosAgent()
 
 		self.grid.show(self.render_mode, self.metadata["render_fps"])
 
@@ -60,18 +59,18 @@ class GoLeftEnv(gym.Env):
 
 	def step(self, action):
 		self.nb_step += 1
-		# Check the position of the agent (if there is a wall or is out of bounds)
-		next_pos, tmp_reward = self.check_pos_move(action)
-		self.grid.setAgentPos(next_pos)
-		self.agent_pos = self.grid.getAgentPos()
+
+		self.grid.move(action)
 
 		# Is he hidded
 		done = self.grid.isHide()
 		# He gets a better reward if he finds it quick
-		reward = tmp_reward if not done else 10/self.nb_step
+		reward = 0 if not done else 10/self.nb_step
 
 		# Optionally we can pass additional info, we are not using that for now
 		info = {}
+
+		self.agent_pos = self.grid.getPosAgent()
 
 		if self.render_mode == "human":
 			self.grid.show(self.render_mode, self.metadata["render_fps"])
@@ -81,31 +80,6 @@ class GoLeftEnv(gym.Env):
 	def render(self, mode="human"):
 		if self.render_mode == "rgb_array":
 			return self.grid.show(self.render_mode, self.metadata["render_fps"])
-
-	def check_pos_move(self, action):
-		"""
-			Return the future position of the agent if it not goes in walls or out of bounds
-		"""
-		future_pos = [self.grid.getAgentPos()[0], self.grid.getAgentPos()[1]]
-		if action == self.LEFT:
-			future_pos[0] -= 1
-		elif action == self.RIGHT:
-			future_pos[0] += 1
-		elif action == self.UP:
-			future_pos[1] -= 1
-		elif action == self.DOWN:
-			future_pos[1] += 1
-
-		# Check the bounds of the map
-		if future_pos[0]<0 or future_pos[0]>=self.grid_size or future_pos[1]<0 or future_pos[1]>=self.grid_size:
-			return self.agent_pos, -1
-
-		if self.grid.isWall(future_pos[0], future_pos[1]):
-			return self.agent_pos, -1
-		elif self.grid.isTurret(future_pos[0], future_pos[1]):
-			return self.agent_pos, -1
-		else:
-			return future_pos, 0
 	
 def main():
 	# Instantiate the env
@@ -113,29 +87,9 @@ def main():
 	# If the environment don't follow the interface, an error will be thrown
 	check_env(env, warn=True)
 
-	# Here we can try the environement by sending actions to move the player
-	# obs = env.reset()
-	# env.render()
-
-	# print(env.observation_space)
-	# print(env.action_space)
-	# print(env.action_space.sample())
-
-	# n_steps = 100
-	# for step in range(n_steps):
-	# 	print("Step {}".format(step + 1))
-	# 	move = int(input("Direction"))
-	# 	obs, reward, done, info = env.step(move)
-	# 	print('obs=', obs, 'reward=', reward, 'done=', done)
-	# 	env.render()
-	# 	if done:
-	# 		print("Goal reached!", "reward=", reward)
-	# 		break
-
-
 	# We vectorize the environement, choose a model and make it learn how to hide
 	env = make_vec_env(lambda: env, n_envs=1)
-	model = PPO('MlpPolicy', env, verbose=1, batch_size=256, n_epochs=50, n_steps=4096).learn(100000, progress_bar=True)
+	model = PPO('MlpPolicy', env, verbose=1, batch_size=256, n_epochs=50, n_steps=4096).learn(10000, progress_bar=True)
 	model.save("Hidding")
 
 	env = GoLeftEnv(grid_size=20, render_mode="human")
@@ -143,7 +97,7 @@ def main():
 
 	# Test the trained agent
 	obs = env.reset()
-	n_steps = 50
+	n_steps = 30
 	for i in range(10):
 		for step in range(n_steps):
 			action, _ = model.predict(obs, deterministic=True)
