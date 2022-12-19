@@ -202,12 +202,14 @@ class Grid():
 
 		#assure new position is valid
 		if(not self.validMove(x,y)):
-			return
+			return -1
 
 		#upfate position on the grid
 		self.__grid[self.__posAgent[0],self.__posAgent[1]] = self.__VOID
 		self.__grid[x,y] = self.__PLAYER
 		self.__posAgent[0], self.__posAgent[1] = x,y  
+
+		return 0
 
 	def getPosAgent(self):
 		return np.array(self.__posAgent, dtype=np.float32)

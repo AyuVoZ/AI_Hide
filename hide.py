@@ -60,12 +60,12 @@ class GoLeftEnv(gym.Env):
 	def step(self, action):
 		self.nb_step += 1
 
-		self.grid.move(action)
+		tmp_reward = self.grid.move(action)
 
 		# Is he hidded
 		done = self.grid.isHide()
 		# He gets a better reward if he finds it quick
-		reward = 0 if not done else 10/self.nb_step
+		reward = tmp_reward if not done else 10/self.nb_step
 
 		# Optionally we can pass additional info, we are not using that for now
 		info = {}
