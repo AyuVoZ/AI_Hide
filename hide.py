@@ -80,6 +80,9 @@ class GoLeftEnv(gym.Env):
 	def render(self, mode="human"):
 		if self.render_mode == "rgb_array":
 			return self.grid.show(self.render_mode, self.metadata["render_fps"])
+
+	def change_render_mode(self, mode):
+		self.render_mode = mode
 	
 def main():
 	# Instantiate the env
@@ -88,16 +91,13 @@ def main():
 	check_env(env, warn=True)
 
 	# We vectorize the environement, choose a model and make it learn how to hide
-	env = make_vec_env(lambda: env, n_envs=1)
-	model = PPO('MlpPolicy', env, verbose=1, batch_size=256, n_epochs=50, n_steps=4096).learn(10000, progress_bar=True)
-	model.save("Hidding")
-
-	env = GoLeftEnv(grid_size=20, render_mode="human")
-	model = PPO.load("Hidding", env=env)
+	# env = make_vec_env(lambda: env, n_envs=1)
+	model = PPO('MlpPolicy', env, verbose=1, batch_size=256, n_epochs=50, n_steps=12288).learn(100000, progress_bar=True)
+	env.change_render_mode("human")
 
 	# Test the trained agent
 	obs = env.reset()
-	n_steps = 30
+	n_steps = 20
 	for i in range(10):
 		for step in range(n_steps):
 			action, _ = model.predict(obs, deterministic=True)

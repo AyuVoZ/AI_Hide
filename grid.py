@@ -202,7 +202,7 @@ class Grid():
 
 		#assure new position is valid
 		if(not self.validMove(x,y)):
-			return -1
+			return -2
 
 		#upfate position on the grid
 		self.__grid[self.__posAgent[0],self.__posAgent[1]] = self.__VOID
