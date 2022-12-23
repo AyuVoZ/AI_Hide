@@ -35,8 +35,8 @@ class GoLeftEnv(gym.Env):
 		self.action_space = spaces.Discrete(n_actions)
 		# The observation will be the coordinate of the agent
 		# this can be described both by Discrete and Box space
-		self.observation_space = spaces.Box(low=0, high=self.grid.size(),
-											shape=(2,), dtype=np.float32)
+		self.observation_space = spaces.Box(low=0, high=10,
+											shape=(8,), dtype=np.float32)
 		self.nb_step = 0
 
 		assert render_mode is None or render_mode in self.metadata["render_modes"]
@@ -48,14 +48,18 @@ class GoLeftEnv(gym.Env):
 		:return: (np.array) 
 		"""
 		# Initialize the agent randomly and reset the number of steps
+		#self.grid = grid.Grid(self.grid_size)
 		self.grid.placeAgentRandom(reset=True)
 		self.nb_step = 0
 		self.agent_pos = self.grid.getPosAgent()
+		self.sensors = np.array(self.grid.getSensors(), dtype=np.float32)
 
 		self.grid.show(self.render_mode, self.metadata["render_fps"])
 
 		# here we convert to float32 to make it more general (in case we want to use continuous actions)
-		return np.array(self.agent_pos, dtype=np.float32)
+		#return self.grid.getSensors()
+		return self.sensors
+	
 
 	def step(self, action):
 		self.nb_step += 1
@@ -71,11 +75,12 @@ class GoLeftEnv(gym.Env):
 		info = {}
 
 		self.agent_pos = self.grid.getPosAgent()
+		self.sensors = np.array(self.grid.getSensors(), dtype=np.float32)
 
 		if self.render_mode == "human":
 			self.grid.show(self.render_mode, self.metadata["render_fps"])
 
-		return np.array(self.agent_pos, dtype=np.float32), reward, done, info
+		return self.sensors, reward, done, info
 
 	def render(self, mode="human"):
 		if self.render_mode == "rgb_array":
@@ -95,10 +100,12 @@ def main():
 	model = PPO('MlpPolicy', env, verbose=1, batch_size=256, n_epochs=50, n_steps=12288).learn(100000, progress_bar=True)
 	env.change_render_mode("human")
 
+	input("Press Enter to continue...")
+
 	# Test the trained agent
 	obs = env.reset()
 	n_steps = 20
-	for i in range(10):
+	for i in range(20):
 		for step in range(n_steps):
 			action, _ = model.predict(obs, deterministic=True)
 			print("Step {}".format(step + 1))

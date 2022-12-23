@@ -2,6 +2,7 @@ import numpy as np
 import random
 import math
 import pygame
+import time
 
 class Grid():
 
@@ -16,6 +17,15 @@ class Grid():
 	__UP = 2
 	__DOWN = 3
 
+	__NORTH = 0
+	__NORTH_EAST = 1
+	__EAST = 2
+	__SOUTH_EAST = 3
+	__SOUTH = 4
+	__SOUTH_WEST = 5
+	__WEST = 6
+	__NORTH_WEST = 7
+
 
 	
 	def __init__(self, gridSize):
@@ -28,7 +38,7 @@ class Grid():
 		self.clock = None
 
 	#procedural generation of the grid
-	def __generate(self, nObstacles = 6, p = 0.05, nLenght = 10):
+	def __generate(self, nObstacles = 7, p = 0.05, nLenght = 12):
 		self.__grid = np.zeros((self.__size, self.__size))
 		self.__posTurret = [int(self.__size/2), int(self.__size/2)]
 		
@@ -55,6 +65,7 @@ class Grid():
 
 		#place the player randomly on the map
 		self.placeAgentRandom()
+
 
 		
 	def placeAgentRandom(self, reset = False):
@@ -212,13 +223,76 @@ class Grid():
 		return 0
 
 	def getPosAgent(self):
-		return np.array(self.__posAgent, dtype=np.float32)
+		return self.__posAgent
+		
+
+	#return the values of the virtual sensors of the robot
+	def getSensors(self):
+		nLenght = 10
+		nDir = 8
+		sensors = np.zeros(nDir, dtype=np.float32)
+
+		x,y = self.getPosAgent()
+
+		#for each direction
+		for i in range(nDir):
+			for j in range(1, nLenght+1):
+				sensors[i] = j
+				if (i== self.__NORTH):
+					if(y-j<0):
+						break
+					if(self.__grid[x,y-j]!=self.__VOID):
+						break
+				elif (i==self.__NORTH_EAST):
+					if(y-j<0 or x+j>=self.__size):
+						break
+					if(self.__grid[x+j,y-j]!=self.__VOID):
+						break
+				elif (i==self.__EAST):
+					if(x+j>=self.__size):
+						break
+					if(self.__grid[x+j,y]!=self.__VOID):
+						break	
+				elif (i==self.__SOUTH_EAST):
+					if(y+j>=self.__size or x+j>=self.__size):
+						break
+					if(self.__grid[x+j,y+j]!=self.__VOID):
+						break
+				elif (i==self.__SOUTH):
+					if(y+j>=self.__size):
+						break
+					if(self.__grid[x,y+j]!=self.__VOID):
+						break
+				elif (i==self.__SOUTH_WEST):
+					if(y+j>=self.__size or x-j<0):
+						break
+					if(self.__grid[x-j,y+j]!=self.__VOID):
+						break
+				elif (i==self.__WEST):
+					if(x-j<0):
+						break
+					if(self.__grid[x-j,y]!=self.__VOID):
+						break
+				elif (i==self.__NORTH_WEST):
+					if(y-j<0 or x-j<0):
+						break
+					if(self.__grid[x-j,y-j]!=self.__VOID):
+						break
+				if(j==nLenght):
+					sensors[i]=0
+
+		return sensors
+		
 
 if __name__ == '__main__':
-	grid = Grid(30)
+	grid = Grid(20)
+	print(grid.getSensors())
 	grid.show()
+	time.sleep(50000)
 	grid.isHide()
 	print(grid.getPosAgent())
+
+	grid.getSensors()
  
 
 
