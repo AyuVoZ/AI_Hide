@@ -20,11 +20,12 @@ class GoLeftEnv(gym.Env):
 	UP = 2
 	DOWN = 3
 
-	def __init__(self, grid_size=12, render_mode=None):
+	def __init__(self, grid_size=12, render_mode=None, sameMap=True):
 		super(GoLeftEnv, self).__init__()
 
 		self.grid_size = grid_size
 		self.grid = grid.Grid(grid_size)
+		self.sameMap = sameMap
 
 		self.agent_pos = self.grid.getPosAgent()
 
@@ -36,7 +37,7 @@ class GoLeftEnv(gym.Env):
 		# The observation will be the coordinate of the agent
 		# this can be described both by Discrete and Box space
 		self.observation_space = spaces.Box(low=0, high=10,
-											shape=(8,), dtype=np.float32)
+											shape=(9,), dtype=np.float32)
 		self.nb_step = 0
 
 		assert render_mode is None or render_mode in self.metadata["render_modes"]
@@ -48,8 +49,11 @@ class GoLeftEnv(gym.Env):
 		:return: (np.array) 
 		"""
 		# Initialize the agent randomly and reset the number of steps
-		#self.grid = grid.Grid(self.grid_size)
-		self.grid.placeAgentRandom(reset=True)
+		if(self.sameMap):
+			self.grid.placeAgentRandom(reset=True)
+		else:
+			self.grid = grid.Grid(self.grid_size)
+		
 		self.nb_step = 0
 		self.agent_pos = self.grid.getPosAgent()
 		self.sensors = np.array(self.grid.getSensors(), dtype=np.float32)
@@ -91,13 +95,13 @@ class GoLeftEnv(gym.Env):
 	
 def main():
 	# Instantiate the env
-	env = GoLeftEnv(grid_size=20)
+	env = GoLeftEnv(grid_size=20, sameMap=True)
 	# If the environment don't follow the interface, an error will be thrown
 	check_env(env, warn=True)
 
 	# We vectorize the environement, choose a model and make it learn how to hide
 	# env = make_vec_env(lambda: env, n_envs=1)
-	model = PPO('MlpPolicy', env, verbose=1, batch_size=256, n_epochs=50, n_steps=12288).learn(100000, progress_bar=True)
+	model = PPO('MlpPolicy', env, verbose=1, batch_size=256, n_epochs=50, n_steps=12288).learn(300000, progress_bar=True)
 	env.change_render_mode("human")
 
 	input("Press Enter to continue...")

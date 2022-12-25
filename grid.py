@@ -230,7 +230,7 @@ class Grid():
 	def getSensors(self):
 		nLenght = 10
 		nDir = 8
-		sensors = np.zeros(nDir, dtype=np.float32)
+		sensors = np.zeros(nDir+1, dtype=np.float32)
 
 		x,y = self.getPosAgent()
 
@@ -280,6 +280,26 @@ class Grid():
 						break
 				if(j==nLenght):
 					sensors[i]=0
+		
+		dx = self.__posTurret[0] - x
+		dy = self.__posTurret[1] - y
+
+		if(dx==0 and dy<0):
+			sensors[-1] = self.__NORTH
+		elif(dx>0 and dy<0):
+			sensors[-1]= self.__NORTH_EAST
+		elif(dx>0 and dy==0):
+			sensors[-1] = self.__EAST
+		elif(dx>0 and dy<0):
+			sensors[-1] = self.__SOUTH_EAST
+		elif(dx==0 and dy>0):
+			sensors[-1] = self.__SOUTH
+		elif(dx<0 and dy>0):
+			sensors[-1] = self.__SOUTH_WEST
+		elif(dx<0 and dy==0):
+			sensors[-1] = self.__WEST
+		elif(dx<0 and dy<0):
+			sensors[-1] = self.__NORTH_WEST
 
 		return sensors
 		
