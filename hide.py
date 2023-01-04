@@ -2,8 +2,7 @@ import numpy as np
 import gym
 from gym import spaces
 from stable_baselines3.common.env_checker import check_env
-from stable_baselines3 import PPO, A2C, DQN # DQN coming soon	
-from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3 import PPO
 import grid
 
 
@@ -106,13 +105,13 @@ class GoLeftEnv(gym.Env):
 	
 def main():
 	# Instantiate the env
-	env = GoLeftEnv(grid_size=20, sameMap=True)
+	env = GoLeftEnv(grid_size=20, sameMap=False)
 	# If the environment don't follow the interface, an error will be thrown
 	check_env(env, warn=True)
 
 	# We vectorize the environement, choose a model and make it learn how to hide
-	# env = make_vec_env(lambda: env, n_envs=1)
-	model = PPO('MultiInputPolicy', env, verbose=1, batch_size=256, n_epochs=50, n_steps=12288).learn(300000, progress_bar=True)
+	
+	model = PPO('MultiInputPolicy', env, verbose=1, batch_size=256, n_epochs=50, n_steps=12288).learn(50000, progress_bar=True)
 	env.change_render_mode("human")
 
 	input("Press Enter to continue...")
