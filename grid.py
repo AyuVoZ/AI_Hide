@@ -76,6 +76,7 @@ class Grid():
 
 		correct = False
 		while(not correct):
+			self.__posAgent = []
 			self.__posAgent = [np.random.randint(0,self.__size-1), np.random.randint(0,self.__size-1)]
 			if((self.__grid[self.__posAgent[0], self.__posAgent[1]]== self.__VOID) and not self.isHide()):
 				correct = True

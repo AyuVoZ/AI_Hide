@@ -36,19 +36,14 @@ class GoLeftEnv(gym.Env):
 		self.action_space = spaces.Discrete(n_actions)
 		# The observation will be the coordinate of the agent
 		# this can be described both by Discrete and Box space
-		self.observation_space = spaces.Dict(
-            {
-                "sensors": spaces.Box(0, 10, shape=(9,), dtype=np.float32),
-                "agent": spaces.Box(0, grid_size, shape=(2,), dtype=np.float32),
-            }
-        )
+		self.observation_space = spaces.Box(0, 10, shape=(9,), dtype=np.float32)
 		self.nb_step = 0
 
 		assert render_mode is None or render_mode in self.metadata["render_modes"]
 		self.render_mode = render_mode
 
-	def _get_obs(self):
-		return {"agent": self.agent_pos, "sensors": self.sensors}
+	# def _get_obs(self):
+	# 	return {"agent": self.agent_pos, "sensors": self.sensors}
 
 	def reset(self):
 		"""
@@ -59,19 +54,18 @@ class GoLeftEnv(gym.Env):
 		if(self.sameMap):
 			self.grid.placeAgentRandom(reset=True)
 		else:
+			del self.grid
 			self.grid = grid.Grid(self.grid_size)
 		
 		self.nb_step = 0
-		self.agent_pos = np.array(self.grid.getPosAgent(), dtype=np.float32)
+		#self.agent_pos = np.array(self.grid.getPosAgent(), dtype=np.float32)
 		self.sensors = np.array(self.grid.getSensors(), dtype=np.float32)
 
 		self.grid.show(self.render_mode, self.metadata["render_fps"])
 
-		observation = self._get_obs()
-
 		# here we convert to float32 to make it more general (in case we want to use continuous actions)
 		#return self.grid.getSensors()
-		return observation
+		return self.sensors
 	
 
 	def step(self, action):
@@ -87,15 +81,13 @@ class GoLeftEnv(gym.Env):
 		# Optionally we can pass additional info, we are not using that for now
 		info = {}
 
-		self.agent_pos = np.array(self.grid.getPosAgent(), dtype=np.float32)
+		#self.agent_pos = np.array(self.grid.getPosAgent(), dtype=np.float32)
 		self.sensors = np.array(self.grid.getSensors(), dtype=np.float32)
 
 		if self.render_mode == "human":
 			self.grid.show(self.render_mode, self.metadata["render_fps"])
 
-		observation = self._get_obs()
-
-		return observation, reward, done, info
+		return self.sensors, reward, done, info
 
 	def render(self, mode="human"):
 		if self.render_mode == "rgb_array":
@@ -112,7 +104,7 @@ def main():
 
 	# We vectorize the environement, choose a model and make it learn how to hide
 	# env = make_vec_env(lambda: env, n_envs=1)
-	model = PPO('MultiInputPolicy', env, verbose=1, batch_size=256, n_epochs=50, n_steps=12288).learn(300000, progress_bar=True)
+	model = DQN('MlpPolicy', env).learn(200000, progress_bar=True)
 	env.change_render_mode("human")
 
 	input("Press Enter to continue...")
