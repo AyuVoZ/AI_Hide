@@ -2,7 +2,7 @@ import numpy as np
 import gym
 from gym import spaces
 from stable_baselines3.common.env_checker import check_env
-from stable_baselines3 import PPO
+from stable_baselines3 import DQN
 import grid
 
 
