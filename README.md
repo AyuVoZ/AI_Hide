@@ -49,10 +49,14 @@ The agent uses the PPO (or DQN) reinforcement learning algorithm from [Stable-Ba
 
 # Results
 
-This algorithm works well in a known environment where it can find the fastest way to hide from the turret. It works much less well when it trains in different environments, it only goes in one direction. The following video illustrate the results:
+This algorithm works well in a known environment where it can find the fastest way to hide from the turret. It works much less well when it trains in different environments, it only goes in one direction. The following videos illustrate the results (on same map) :
 
-****************************** video **********************************
 
+* 300 000 steps 
+[![Alt text](https://img.youtube.com/vi/mGILjY6oc3k/0.jpg)](https://www.youtube.com/watch?v=mGILjY6oc3k)
+
+* 100 000 steps
+[![Alt text](https://img.youtube.com/vi/DYT849A3-5M/0.jpg)](https://www.youtube.com/watch?v=DYT849A3-5M)
 
 # Challenges
 
