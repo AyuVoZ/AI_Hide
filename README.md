@@ -53,9 +53,11 @@ This algorithm works well in a known environment where it can find the fastest w
 
 
 * 300 000 steps 
+
 [![Alt text](https://img.youtube.com/vi/mGILjY6oc3k/0.jpg)](https://www.youtube.com/watch?v=mGILjY6oc3k)
 
 * 100 000 steps
+
 [![Alt text](https://img.youtube.com/vi/DYT849A3-5M/0.jpg)](https://www.youtube.com/watch?v=DYT849A3-5M)
 
 # Challenges
